@@ -1,0 +1,74 @@
+name: t2305m_teacher
+description: "A new Flutter project."
+publish_to: 'none'  # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.6.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  analyzer: ^6.2.0
+  cupertino_icons: ^1.0.8
+  provider: ^6.1.2
+  flutter_native_splash: ^2.4.5
+  intl: ^0.20.2
+  image_picker: ^1.1.2
+  file_picker: ^10.0.0
+  fl_chart: ^0.66.0
+  retrofit: ^4.4.2
+  dio: ^5.8.0+1
+  font_awesome_flutter: ^10.8.0
+  shared_preferences: ^2.5.2
+  http: ^0.13.3
+  qr_flutter: ^4.1.0
+  json_annotation: ^4.9.0
+  flutter_iconpicker: ^3.3.3
+  qr_code_scanner: ^1.0.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  retrofit_generator: ^9.1.9
+  build_runner: ^2.4.7
+  json_serializable: ^6.7.1
+
+flutter:
+  assets:
+    - assets/images/noithat.jpg
+    - assets/images/be.jpg
+    - assets/images/bangtin.png
+    - assets/images/gopy.jpg
+    - assets/images/thuvienanh.jpg
+    - assets/images/suckhoe.png
+    - assets/images/hocphi.png
+    - assets/images/hoctap.png
+    - assets/images/thucdon.png
+    - assets/images/unnamed.png
+    - assets/images/task_9012120.png
+    - assets/images/basketball_7108306.png
+    - assets/images/QA.png
+    - assets/images/buasang.jpg
+    - assets/images/buatrua.jpg
+    - assets/images/buaphu.jpg
+    - assets/images/loinhan.jpg
+    - assets/images/nhatky.jpg
+    - assets/images/teacher.jpg
+
+  uses-material-design: true
+
+flutter_native_splash:
+  android: true
+  ios: true
+  web: false
+  color: "#FAFAFA"
+  image: "assets/images/QA.png"  # Logo bạn muốn hiển thị
+  branding: null
+
+  android_12:
+    color: "#FAFAFA"
+    image: "assets/images/QA.png"  # Logo trên Android 12+
+    branding: null
