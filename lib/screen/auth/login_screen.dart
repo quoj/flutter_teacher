@@ -1,11 +1,11 @@
 import 'dart:io';
+
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:t2305m_teacher/root_page.dart';
 import '../../api/api_service.dart';
 import '../../models/login_request.dart';
-import 'package:t2305m_teacher/root_page.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -19,67 +19,47 @@ class _StateLogin extends State<LoginScreen> {
   final passwordController = TextEditingController();
   bool _hidePassword = true;
 
-  late final ApiService apiService;
-
-  @override
-  void initState() {
-    super.initState();
-    initialization();
-
-    // ✅ Khởi tạo Dio và ApiService chỉ một lần
-    final dio = Dio(BaseOptions(
-      baseUrl: "http://192.168.1.102:8080/t2305m_flutter/api/users",
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 10),
-    ));
-    apiService = ApiService(dio);
-  }
-
-  void initialization() async {
-    await Future.delayed(const Duration(seconds: 3));
-    FlutterNativeSplash.remove();
-  }
+  bool isAdmin = false; // Thêm biến này để xác định quyền admin
 
   Future<void> login(String email, String password) async {
+    final dio = Dio();
+    final apiService = ApiService(dio);
+
     try {
-      final user = await apiService.loginUser(
-        LoginRequest(email: email, password: password),
+      final user = await apiService.loginUser(LoginRequest(email: email, password: password));
+      print("Đăng nhập thành công: ${user.name}");
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const RootPage()),
       );
+    } on DioException catch (e) {
+      String errorMsg = "Lỗi đăng nhập không xác định";
 
-      if (user != null) {
-        if (kDebugMode) {
-          print("✅ Đăng nhập thành công: ${user.name}");
+      // Kiểm tra các loại lỗi từ Dio
+      if (e.type == DioExceptionType.connectionTimeout) {
+        errorMsg = "Kết nối hết thời gian. Kiểm tra lại mạng!";
+      } else if (e.type == DioExceptionType.receiveTimeout) {
+        errorMsg = "Máy chủ không phản hồi kịp!";
+      } else if (e.type == DioExceptionType.badResponse) {
+        if (e.response?.statusCode == 403) {
+          errorMsg = "Bạn không có quyền truy cập vào tài nguyên này (403)";
+        } else if (e.response?.statusCode == 401) {
+          errorMsg = "Thông tin đăng nhập không hợp lệ (401)";
+        } else {
+          errorMsg = "Lỗi từ máy chủ: ${e.response?.statusCode}";
         }
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const RootPage()),
-        );
-      } else {
-        showError("❌ Không có dữ liệu người dùng.");
-      }
-    } on DioException catch (dioError) {
-      String errorMsg;
-
-      if (dioError.type == DioExceptionType.connectionTimeout) {
-        errorMsg = "⏱ Kết nối hết thời gian.";
-      } else if (dioError.type == DioExceptionType.receiveTimeout) {
-        errorMsg = "⏱ Máy chủ không phản hồi.";
-      } else if (dioError.type == DioExceptionType.badResponse) {
-        errorMsg = "❌ Lỗi từ máy chủ: ${dioError.response?.statusCode}";
-      } else if (dioError.error is SocketException) {
-        errorMsg = "📡 Không thể kết nối máy chủ. Kiểm tra mạng hoặc IP.";
-      } else {
-        errorMsg = "❗ Lỗi không xác định: ${dioError.message}";
+      } else if (e.error is SocketException) {
+        errorMsg = "Không thể kết nối máy chủ. Kiểm tra mạng hoặc IP.";
       }
 
+      // Hiển thị lỗi chi tiết
       showError(errorMsg);
     } catch (e) {
-      showError("❌ Lỗi không mong muốn: $e");
+      showError("Lỗi không mong muốn: $e");
     }
   }
 
   void showError(String message) {
-    if (kDebugMode) print(message);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message, style: const TextStyle(fontSize: 16.0)),
@@ -89,27 +69,45 @@ class _StateLogin extends State<LoginScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    initialization();
+  }
+
+  void initialization() async {
+    await Future.delayed(const Duration(seconds: 3));
+    FlutterNativeSplash.remove();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        padding: const EdgeInsets.symmetric(vertical: 50.0, horizontal: 30.0),
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF4D65F9), Color(0xFFFF4880)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
+        padding: const EdgeInsets.symmetric(vertical: 100.0, horizontal: 30.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Center(
-              child: Text(
-                "SISAP",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 48.0,
-                  fontWeight: FontWeight.bold,
+            Center(
+              child: RichText(
+                text: const TextSpan(
+                  children: [
+                    TextSpan(
+                      text: "Baby",
+                      style: TextStyle(
+                        color: Color(0xFFFF4880),
+                        fontSize: 48.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextSpan(
+                      text: "Care",
+                      style: TextStyle(
+                        color: Color(0xFF4D65F9),
+                        fontSize: 48.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -117,12 +115,10 @@ class _StateLogin extends State<LoginScreen> {
             TextField(
               controller: emailController,
               decoration: const InputDecoration(
-                filled: true,
-                fillColor: Colors.white,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(15.0)),
                 ),
-                labelText: "SĐT",
+                labelText: "Email",
                 prefixIcon: Icon(Icons.email),
               ),
             ),
@@ -131,18 +127,14 @@ class _StateLogin extends State<LoginScreen> {
               controller: passwordController,
               obscureText: _hidePassword,
               decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.white,
                 border: const OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(15.0)),
                 ),
-                labelText: "Mật khẩu",
+                labelText: "Password",
                 prefixIcon: const Icon(Icons.lock),
                 suffixIcon: IconButton(
                   icon: Icon(
-                    _hidePassword
-                        ? Icons.visibility_outlined
-                        : Icons.visibility_off_outlined,
+                    _hidePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
                   ),
                   onPressed: () {
                     setState(() {
@@ -156,10 +148,7 @@ class _StateLogin extends State<LoginScreen> {
             Center(
               child: ElevatedButton(
                 onPressed: () {
-                  login(
-                    emailController.text.trim(),
-                    passwordController.text.trim(),
-                  );
+                  login(emailController.text.trim(), passwordController.text.trim());
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
@@ -169,7 +158,7 @@ class _StateLogin extends State<LoginScreen> {
                   ),
                 ),
                 child: const Text(
-                  "Đăng nhập",
+                  "Log in",
                   style: TextStyle(fontSize: 18, color: Colors.white),
                 ),
               ),

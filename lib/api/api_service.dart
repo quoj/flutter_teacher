@@ -24,7 +24,7 @@ import '../models/teachers.dart'; // ✅ Thêm dòng này
 
 part 'api_service.g.dart';
 
-@RestApi(baseUrl: "http://192.168.1.17:8080/api")
+@RestApi(baseUrl: "http://10.0.2.2:8080")
 abstract class ApiService {
   factory ApiService(Dio dio, {String baseUrl}) = _ApiService;
 

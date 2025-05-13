@@ -27,6 +27,8 @@ dependencies:
   json_annotation: ^4.9.0
   flutter_iconpicker: ^3.3.3
   qr_code_scanner: ^1.0.1
+  google_mlkit_barcode_scanning: ^0.10.0
+  path_provider: ^2.0.10
 
 dev_dependencies:
   flutter_test:
@@ -57,6 +59,7 @@ flutter:
     - assets/images/loinhan.jpg
     - assets/images/nhatky.jpg
     - assets/images/teacher.jpg
+    - assets/images/1.png
 
   uses-material-design: true
 
