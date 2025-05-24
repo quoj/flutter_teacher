@@ -7,21 +7,22 @@ part of 'menu.dart';
 // **************************************************************************
 
 Menu _$MenuFromJson(Map<String, dynamic> json) => Menu(
-      id: (json['id'] as num).toInt(),
-      date: DateTime.parse(json['date'] as String),
+      dayOfWeek: json['dayOfWeek'] as String?,
       breakfast: json['breakfast'] as String?,
+      secondBreakfast: json['secondBreakfast'] as String?,
       lunch: json['lunch'] as String?,
       dinner: json['dinner'] as String?,
-      snack: json['snack'] as String?,
-      createdAt: DateTime.parse(json['createdAt'] as String),
+      secondDinner: json['secondDinner'] as String?,
+      date:
+          json['date'] == null ? null : DateTime.parse(json['date'] as String),
     );
 
 Map<String, dynamic> _$MenuToJson(Menu instance) => <String, dynamic>{
-      'id': instance.id,
-      'date': instance.date.toIso8601String(),
+      'dayOfWeek': instance.dayOfWeek,
       'breakfast': instance.breakfast,
+      'secondBreakfast': instance.secondBreakfast,
       'lunch': instance.lunch,
       'dinner': instance.dinner,
-      'snack': instance.snack,
-      'createdAt': instance.createdAt.toIso8601String(),
+      'secondDinner': instance.secondDinner,
+      'date': instance.date?.toIso8601String(),
     };

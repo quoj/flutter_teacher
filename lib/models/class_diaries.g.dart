@@ -16,6 +16,9 @@ ClassDiary _$ClassDiaryFromJson(Map<String, dynamic> json) => ClassDiary(
       teacherNote: json['teacherNote'] as String,
       imagePath: json['imagePath'] as String?,
       createdAt: json['createdAt'] as String,
+      students: (json['students'] as List<dynamic>?)
+          ?.map((e) => Student.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
 
 Map<String, dynamic> _$ClassDiaryToJson(ClassDiary instance) =>
@@ -29,4 +32,5 @@ Map<String, dynamic> _$ClassDiaryToJson(ClassDiary instance) =>
       'teacherNote': instance.teacherNote,
       'imagePath': instance.imagePath,
       'createdAt': instance.createdAt,
+      'students': instance.students,
     };

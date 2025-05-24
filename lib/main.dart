@@ -3,10 +3,13 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:t2305m_teacher/bloc/bloc.dart';
 import 'package:t2305m_teacher/screen/auth/login_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 void main() {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+  Intl.defaultLocale = 'vi_VN'; // Thiết lập locale
   runApp(
     ChangeNotifierProvider(
       create: (_)=> Bloc(),

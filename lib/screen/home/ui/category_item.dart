@@ -9,6 +9,7 @@ import 'package:t2305m_teacher/models/health.dart';
 import 'package:t2305m_teacher/models/menu.dart';
 import 'package:t2305m_teacher/models/attendance.dart';
 import 'package:t2305m_teacher/models/class_diaries.dart';
+import 'package:t2305m_teacher/models/students.dart';
 import 'package:t2305m_teacher/models/leave_requests.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
@@ -100,237 +101,121 @@ class AttendancePage extends StatefulWidget {
   _AttendancePageState createState() => _AttendancePageState();
 }
 
-class _AttendancePageState extends State<AttendancePage> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class _AttendancePageState extends State<AttendancePage> {
   late ApiService apiService;
   List<Attendance> attendances = [];
-  List<LeaveRequest> leaveRequests = [];
   bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
     apiService = ApiService(Dio(), baseUrl: "http://10.0.2.2:8080");
     fetchData();
   }
 
   Future<void> fetchData() async {
     try {
-      final data = await Future.wait([
-        apiService.getAttendances(),
-        apiService.getLeaveRequests(),
-      ]);
+      final data = await apiService.getAttendances();
       setState(() {
-        attendances = data[0] as List<Attendance>;
-        leaveRequests = data[1] as List<LeaveRequest>;
+        attendances = data;
         isLoading = false;
       });
     } catch (e) {
-      print("Error fetching data: $e");
+      print("Error fetching attendance data: $e");
       setState(() {
         isLoading = false;
       });
     }
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
-        title: Text("Điểm danh", style: TextStyle(color: Colors.black)),
-        backgroundColor: Colors.white,
-        elevation: 1,
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(120),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildInfoColumn("Sĩ số", "${attendances.length}"),
-                _buildInfoColumn("Vào muộn", "${_countLate()}"),
-                _buildInfoColumn("Có phép", "${_countLeave()}"),
-                _buildInfoColumn("Không phép", "${_countAbsent()}"),
-              ],
-            ),
-          ),
-        ),
+        title: const Text("Điểm danh", style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.blueAccent,
+        elevation: 4,
+        centerTitle: true,
       ),
       body: isLoading
-          ? Center(child: CircularProgressIndicator())
-          : _buildAttendanceTab(),
-    );
-  }
-
-  Widget _buildAttendanceTab() {
-    if (attendances.isEmpty) {
-      return Center(child: Text("Không có dữ liệu điểm danh."));
-    }
-
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Danh sách điểm danh",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
+          ? const Center(child: CircularProgressIndicator())
+          : attendances.isEmpty
+          ? const Center(
+        child: Text(
+          "Không có dữ liệu điểm danh.",
+          style: TextStyle(fontSize: 16, color: Colors.grey),
         ),
-        Expanded(
-          child: ListView.builder(
+      )
+          : ListView.builder(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        itemCount: attendances.length,
+        itemBuilder: (context, index) {
+          final a = attendances[index];
+          return Container(
+            margin: const EdgeInsets.only(bottom: 16),
             padding: const EdgeInsets.all(16),
-            itemCount: attendances.length,
-            itemBuilder: (context, index) {
-              final a = attendances[index];
-              return Card(
-                margin: const EdgeInsets.only(bottom: 16),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                )
+              ],
+            ),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  backgroundColor: a.status == "present"
+                      ? Colors.green.shade100
+                      : a.status == "absent"
+                      ? Colors.red.shade100
+                      : Colors.orange.shade100,
+                  radius: 28,
+                  child: Icon(
+                    a.status == "present"
+                        ? Icons.check_circle
+                        : a.status == "absent"
+                        ? Icons.cancel
+                        : Icons.access_time,
+                    size: 32,
+                    color: a.status == "present"
+                        ? Colors.green
+                        : a.status == "absent"
+                        ? Colors.red
+                        : Colors.orange,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          CircleAvatar(
-                            backgroundColor: Colors.grey[300],
-                            child: Icon(Icons.person, color: Colors.blue),
-                          ),
-                          SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text("Học sinh: ${a.studentName}", style: TextStyle(fontWeight: FontWeight.w500)),
-                                SizedBox(height: 4),
-                                Text("Ngày: ${DateFormat('dd/MM/yyyy').format(a.date)}", style: TextStyle(fontWeight: FontWeight.bold)),
-                                SizedBox(height: 4),
-                                Text("Trạng thái: ${_translateStatus(a.status)}"),
-                                if (a.note != null) Text("Ghi chú: ${a.note}"),
-                              ],
-                            ),
-                          ),
-                          Icon(
-                            a.status == "present"
-                                ? Icons.check_circle
-                                : a.status == "absent"
-                                ? Icons.cancel
-                                : Icons.access_time,
-                            color: a.status == "present"
-                                ? Colors.green
-                                : a.status == "absent"
-                                ? Colors.red
-                                : Colors.orange,
-                          ),
-                        ],
+                      Text(
+                        "📅 Ngày: ${DateFormat('dd/MM/yyyy').format(a.date)}",
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
+                        ),
                       ),
-                      SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          ElevatedButton(
-                            onPressed: () => _updateAttendanceStatus(a, 'present'),
-                            child: Text("Có mặt"),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
-                            ),
-                          ),
-                          ElevatedButton(
-                            onPressed: () => _updateAttendanceStatus(a, 'absent'),
-                            child: Text("Vắng mặt"),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red,
-                            ),
-                          ),
-                        ],
+                      const SizedBox(height: 8),
+                      Text(
+                        "🟢 Trạng thái: ${_translateStatus(a.status)}",
+                        style: const TextStyle(fontSize: 14, color: Colors.black54),
                       ),
                     ],
                   ),
-                ),
-              );
-            },
-          ),
-        ),
-      ],
+                )
+              ],
+            ),
+          );
+        },
+      ),
     );
-  }
-
-  void _updateAttendanceStatus(Attendance attendance, String newStatus) async {
-    try {
-      // Gọi API để cập nhật trạng thái điểm danh
-      final updatedAttendance = await apiService.updateAttendanceStatus(attendance.id, newStatus);
-
-      // Kiểm tra nếu trạng thái thực sự thay đổi
-      if (updatedAttendance.status == newStatus) {
-        // Cập nhật lại thông tin attendance với trạng thái mới trong UI
-        setState(() {
-          int index = attendances.indexWhere((att) => att.id == attendance.id);
-          if (index != -1) {
-            attendances[index] = updatedAttendance;
-          }
-        });
-
-        // Hiển thị thông báo thành công
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Cập nhật trạng thái thành công')),
-        );
-      } else {
-        // Nếu không có thay đổi trạng thái
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Trạng thái không thay đổi')),
-        );
-      }
-    } catch (e) {
-      // Xử lý lỗi nếu có
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Lỗi cập nhật trạng thái: $e')),
-      );
-      print("Lỗi cập nhật: $e");
-    }
-  }
-
-
-
-  Widget _buildInfoColumn(String title, String count) {
-    return Column(
-      children: [
-        Text(title, style: TextStyle(fontSize: 16, color: Colors.black)),
-        SizedBox(height: 4),
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Text(
-            count,
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue),
-          ),
-        ),
-      ],
-    );
-  }
-
-  int _countLate() {
-    return attendances.where((a) => a.status == 'late').length;
-  }
-
-  int _countLeave() {
-    return leaveRequests.where((r) => r.status == 'approved').length;
-  }
-
-  int _countAbsent() {
-    return attendances.where((a) => a.status == 'absent').length;
   }
 
   String _translateStatus(String status) {
@@ -338,11 +223,9 @@ class _AttendancePageState extends State<AttendancePage> with SingleTickerProvid
       case 'present':
         return 'Có mặt';
       case 'absent':
-        return 'Vắng';
-      case 'late':
-        return 'Đi muộn';
+        return 'Vắng mặt';
       default:
-        return 'Không rõ';
+        return 'Không có phép';
     }
   }
 }

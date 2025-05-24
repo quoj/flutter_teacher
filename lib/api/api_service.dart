@@ -21,6 +21,9 @@ import '../models/class_diaries.dart';
 import '../models/notification.dart';
 import '../models/parents.dart';
 import '../models/teachers.dart'; // ✅ Thêm dòng này
+import '../models/extracurricular_activity.dart';
+import '../models/program.dart';
+
 
 part 'api_service.g.dart';
 
@@ -28,7 +31,8 @@ part 'api_service.g.dart';
 abstract class ApiService {
   factory ApiService(Dio dio, {String baseUrl}) = _ApiService;
 
-
+  @GET("/programs")
+  Future<List<Program>> getPrograms();
 
   @GET("/users")
   Future<List<User>> getUsers();
@@ -132,6 +136,9 @@ abstract class ApiService {
   @POST("/class_diaries")
   Future<ClassDiary> createClassDiary(@Body() ClassDiary classDiary);
 
+  @GET("/classes")
+  Future<List<ClassDiary>> getClasses();
+
   @GET("/notifications")
   Future<List<Notification>> getNotifications();
 
@@ -165,4 +172,22 @@ abstract class ApiService {
 
   @DELETE("/teachers/{id}")
   Future<void> deleteTeacher(@Path("id") int id);
+
+  // 🔹 Hoạt động ngoại khóa
+  @GET("/extracurricular_activities")
+  Future<List<ExtracurricularActivity>> getExtracurricularActivities();
+
+  @GET("/extracurricular_activities/{id}")
+  Future<ExtracurricularActivity> getExtracurricularActivityById(@Path("id") int id);
+
+  @POST("/extracurricular_activities")
+  Future<ExtracurricularActivity> createExtracurricularActivity(@Body() ExtracurricularActivity activity);
+
+  @PUT("/extracurricular_activities/{id}")
+  Future<ExtracurricularActivity> updateExtracurricularActivity(
+      @Path("id") int id, @Body() ExtracurricularActivity activity);
+
+  @DELETE("/extracurricular_activities/{id}")
+  Future<void> deleteExtracurricularActivity(@Path("id") int id);
+
 }

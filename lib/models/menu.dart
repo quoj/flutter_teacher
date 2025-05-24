@@ -4,25 +4,33 @@ part 'menu.g.dart';
 
 @JsonSerializable()
 class Menu {
-  final int id;
-  final DateTime date;
+  final String? dayOfWeek; // Tên ngày trong tuần
   final String? breakfast;
+  final String? secondBreakfast;
   final String? lunch;
   final String? dinner;
-  final String? snack;
-  final DateTime createdAt;  // Add this field
+  final String? secondDinner;
+  final DateTime? date; // Ngày thực đơn
 
   Menu({
-    required this.id,
-    required this.date,
+    this.dayOfWeek,
     this.breakfast,
+    this.secondBreakfast,
     this.lunch,
     this.dinner,
-    this.snack,
-    required this.createdAt,  // Add this field to the constructor
+    this.secondDinner,
+    this.date,
   });
 
-  factory Menu.fromJson(Map<String, dynamic> json) => _$MenuFromJson(json);
-
-  Map<String, dynamic> toJson() => _$MenuToJson(this);
+  factory Menu.fromJson(Map<String, dynamic> json) {
+    return Menu(
+      dayOfWeek: json['dayOfWeek'], // ✅ sửa chỗ này
+      breakfast: json['breakfast'],
+      secondBreakfast: json['second_breakfast'],
+      lunch: json['lunch'],
+      dinner: json['dinner'],
+      secondDinner: json['second_dinner'],
+      date: json['date'] != null ? DateTime.parse(json['date']) : null,
+    );
+  }
 }

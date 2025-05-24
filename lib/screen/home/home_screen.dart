@@ -16,7 +16,7 @@ class HomeScreen extends StatelessWidget{
         children: [
           SearchBox(),
           CategoryList(),
-          BulletinWidget(),
+          // BulletinWidget(),
           // FeatureProducts()
         ],
       ),

@@ -1,6 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'students.dart'; // Import lớp Student
 
-part 'class_diaries.g.dart'; // Tạo ra mã tự động cho các phương thức fromJson, toJson
+part 'class_diaries.g.dart';
 
 @JsonSerializable()
 class ClassDiary {
@@ -13,8 +14,8 @@ class ClassDiary {
   final String teacherNote;
   final String? imagePath;
   final String createdAt;
+  final List<Student>? students; // Thêm trường này
 
-  // Constructor
   ClassDiary({
     required this.id,
     required this.classId,
@@ -25,11 +26,10 @@ class ClassDiary {
     required this.teacherNote,
     this.imagePath,
     required this.createdAt,
+    this.students,
   });
 
-  // Phương thức được tạo tự động từ json_serializable
   factory ClassDiary.fromJson(Map<String, dynamic> json) => _$ClassDiaryFromJson(json);
 
-  // Phương thức chuyển đối tượng ClassDiary thành Map
   Map<String, dynamic> toJson() => _$ClassDiaryToJson(this);
 }

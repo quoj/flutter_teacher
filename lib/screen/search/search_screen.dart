@@ -1,24 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import '../../api/api_service.dart';
-import '../../models/parents.dart';
-import '../../models/teachers.dart'; // ✅ Thêm import Teacher model
+import '../../models/students.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
 
   @override
-  _SearchScreenState createState() => _SearchScreenState();
+  State<SearchScreen> createState() => _SearchScreenState();
 }
 
 class _SearchScreenState extends State<SearchScreen> {
   final Dio _dio = Dio();
   late ApiService _apiService;
 
-  List<Parent> parents = [];
-  List<Teacher> teachers = []; // ✅ Đổi kiểu sang List<Teacher>
+  List<Student> students = [];
   String searchQuery = "";
-  bool isTeacherSelected = true;
 
   @override
   void initState() {
@@ -29,12 +26,9 @@ class _SearchScreenState extends State<SearchScreen> {
 
   Future<void> _fetchData() async {
     try {
-      final parentResponse = await _apiService.getParents();
-      final teacherResponse = await _apiService.getTeachers(); // ✅ Gọi API giáo viên
-
+      final studentResponse = await _apiService.getStudents(); // Lấy dữ liệu học sinh
       setState(() {
-        parents = parentResponse;
-        teachers = teacherResponse;
+        students = studentResponse;
       });
     } catch (e) {
       print("Error fetching data: $e");
@@ -43,77 +37,43 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final filteredList = isTeacherSelected
-        ? teachers.where((t) => t.name.toLowerCase().contains(searchQuery.toLowerCase())).toList()
-        : parents.where((p) => p.name.toLowerCase().contains(searchQuery.toLowerCase())).toList();
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Danh bạ"),
+        title: const Text("Danh bạ học sinh"),
         backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 1,
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: TextField(
-              onChanged: (value) {
-                setState(() {
-                  searchQuery = value;
-                });
-              },
-              decoration: InputDecoration(
-                hintText: "Tìm kiếm",
-                border: OutlineInputBorder(),
-                prefixIcon: const Icon(Icons.search),
+      body: students.isEmpty
+          ? const Center(child: Text("Không có học sinh nào"))
+          : ListView.separated(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        itemCount: students.length,
+        separatorBuilder: (context, index) => const SizedBox(height: 8),
+        itemBuilder: (context, index) {
+          final student = students[index];
+          return Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            elevation: 2,
+            child: ListTile(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              title: Text(
+                student.name ?? 'Chưa có tên',
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Địa chỉ: ${student.address ?? 'Chưa có địa chỉ'}"),
+                  Text("Số điện thoại bố: ${student.phoneDad ?? 'Chưa có số'}"),
+                  Text("Số điện thoại mẹ: ${student.phoneMom ?? 'Chưa có số'}"),
+                ],
               ),
             ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    isTeacherSelected = true;
-                  });
-                },
-                child: const Text("Giáo viên"),
-              ),
-              const SizedBox(width: 16),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    isTeacherSelected = false;
-                  });
-                },
-                child: const Text("Phụ huynh"),
-              ),
-            ],
-          ),
-          Expanded(
-            child: ListView.separated(
-              itemCount: filteredList.length,
-              separatorBuilder: (context, index) => const Divider(),
-              itemBuilder: (context, index) {
-                if (isTeacherSelected) {
-                  final teacher = filteredList[index] as Teacher;
-                  return ListTile(
-                    title: Text(teacher.name),
-                    trailing: Text(teacher.phone ?? "Chưa có số"),
-                  );
-                } else {
-                  final parent = filteredList[index] as Parent;
-                  return ListTile(
-                    title: Text(parent.name),
-                    subtitle: parent.studentId != null ? Text("Học sinh: ${parent.studentId}") : null,
-                    trailing: Text(parent.phone ?? "Chưa có số"),
-                  );
-                }
-              },
-            ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }

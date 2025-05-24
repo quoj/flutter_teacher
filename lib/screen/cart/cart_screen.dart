@@ -3,39 +3,38 @@ import 'package:t2305m_teacher/models/user.dart';
 import 'package:t2305m_teacher/api/api_service.dart';
 import 'package:dio/dio.dart';
 import 'package:t2305m_teacher/screen/auth/login_screen.dart';
+
 import '../../../models/announcements.dart';
+import '../../../models/extracurricular_activity.dart';
+import '../../models/program.dart'; // Import model ExtracurricularActivity
+import 'dart:convert';
 
 class CartScreen extends StatefulWidget {
-  const CartScreen({super.key});
+  const CartScreen({Key? key}) : super(key: key);
 
   @override
   _CartScreenState createState() => _CartScreenState();
 }
 
+
 class _CartScreenState extends State<CartScreen> {
-  String selectedCategory = 'Chung';
-  List<Announcement> announcements = [];
+  String selectedTab = 'Chương trình';
+  List<Program> programs = [];
   bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _fetchAnnouncements();
+    _fetchPrograms();
   }
 
-  void _updateNotification(String category) {
-    setState(() {
-      selectedCategory = category;
-    });
-  }
-
-  Future<void> _fetchAnnouncements() async {
+  Future<void> _fetchPrograms() async {
     setState(() => isLoading = true);
     try {
       ApiService apiService = ApiService(Dio());
-      List<Announcement> data = await apiService.getAnnouncements();
+      List<Program> data = await apiService.getPrograms();
       setState(() {
-        announcements = data;
+        programs = data;
         isLoading = false;
       });
     } catch (e) {
@@ -47,59 +46,20 @@ class _CartScreenState extends State<CartScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Thông báo')),
-      body: Column(
-        children: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-
-            ],
-          ),
-          Expanded(
-            child: selectedCategory == 'Chung' || selectedCategory == 'Bảng tin'
-                ? _buildBulletin()
-                : _buildDefaultNotification(),
-          ),
-        ],
+      appBar: AppBar(title: const Text('Ngoại khóa')),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : programs.isEmpty
+          ? const Center(child: Text('Không có chương trình nào'))
+          : ListView.builder(
+        padding: const EdgeInsets.all(8.0),
+        itemCount: programs.length,
+        itemBuilder: (context, index) => _buildProgramCard(programs[index]),
       ),
     );
   }
 
-  Widget _buildDefaultNotification() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          const Icon(Icons.notifications_none, size: 100, color: Colors.blue),
-          const SizedBox(height: 20),
-          Text(
-            _getNotificationText(),
-            style: const TextStyle(fontSize: 16),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBulletin() {
-    if (isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-    if (announcements.isEmpty) {
-      return const Center(child: Text('Không có thông báo nào'));
-    }
-    return ListView.builder(
-      padding: const EdgeInsets.all(8.0),
-      itemCount: announcements.length,
-      itemBuilder: (context, index) {
-        return _buildAnnouncementCard(announcements[index]);
-      },
-    );
-  }
-
-  Widget _buildAnnouncementCard(Announcement announcement) {
+  Widget _buildProgramCard(Program program) {
     return Card(
       elevation: 3,
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
@@ -108,34 +68,34 @@ class _CartScreenState extends State<CartScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(announcement.title, style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text(program.programName,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             const SizedBox(height: 5),
-            Text(announcement.content),
+            Text(program.programDescription ?? 'Không có mô tả'),
             const SizedBox(height: 5),
-            Text('Tác giả: ${announcement.author}', style: const TextStyle(color: Colors.grey, fontSize: 12)),
+            Text(
+              'Số buổi học: ${program.totalSessions ?? 'N/A'}',
+              style: const TextStyle(color: Colors.grey, fontSize: 12),
+            ),
             const SizedBox(height: 5),
-            announcement.imagePath.isNotEmpty
-                ? Image.network(
-              announcement.imagePath,
+            Text(
+              'Học phí: ${program.tuition != null ? "${program.tuition} VNĐ" : "Miễn phí"}',
+              style: const TextStyle(color: Colors.grey, fontSize: 12),
+            ),
+            const SizedBox(height: 10),
+            program.imageBase64 != null && program.imageBase64!.isNotEmpty
+                ? Image.memory(
+              // Giải mã base64 để hiển thị ảnh
+              base64Decode(program.imageBase64!),
+              height: 150,
+              width: double.infinity,
               fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => const Icon(Icons.image_not_supported, size: 100),
             )
-                : Container(),
+                : const Text("Không có ảnh"),
           ],
         ),
       ),
     );
   }
-
-  String _getNotificationText() {
-    switch (selectedCategory) {
-      case 'Về con':
-        return 'Thông báo về con: Không có thông báo mới';
-      case 'Bảng tin':
-      case 'Chung':
-        return 'Đang tải thông báo...';
-      default:
-        return 'Chưa có thông báo nào';
-    }
-  }
 }
+

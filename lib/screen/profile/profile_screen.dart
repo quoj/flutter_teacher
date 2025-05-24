@@ -5,14 +5,12 @@ import '../../../api/api_service.dart';
 import '../../../model/category.dart';
 import '../../../models/menu.dart';
 import '../../../models/schedule.dart';
+import '../../../models/user.dart';
 import '../../../service/category_service.dart';
-import 'package:t2305m_teacher/models/user.dart';
-import 'package:qr_code_scanner/qr_code_scanner.dart';
 
-/// 1. BannerSlider: nhận thêm onQrTap
+/// 1. BannerSlider
 class BannerSlider extends StatelessWidget {
-  final VoidCallback onQrTap;
-  const BannerSlider({super.key, required this.onQrTap});
+  const BannerSlider({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -24,109 +22,36 @@ class BannerSlider extends StatelessWidget {
           end: Alignment.bottomRight,
         ),
       ),
-      padding: const EdgeInsets.all(8), // Giảm padding
+      padding: const EdgeInsets.all(16),
       child: Row(
         children: [
+          // Ảnh minh họa khác hoặc icon
           const CircleAvatar(
-            radius: 30, // Nhỏ hơn (mặc định là 30)
-            backgroundImage: AssetImage('assets/images/teacher.jpg'),
+            radius: 30,
+            backgroundImage: AssetImage('assets/images/teacher.jpg'), // đổi ảnh khác nếu có
           ),
-          const SizedBox(width: 8), // Giảm khoảng cách
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              Text(
-                "Nguyễn Thị Hồng Anh",
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white), // Nhỏ hơn
-              ),
-              Text(
-                "Giáo viên phụ trách",
-                style: TextStyle(color: Colors.white70, fontSize: 12),
-              ),
-              Text(
-                "Lớp Mầm 1",
-                style: TextStyle(color: Colors.white70, fontSize: 12),
-              ),
-            ],
-          ),
-          const Spacer(),
-          IconButton(
-            iconSize: 20, // Nhỏ icon
-            icon: const Icon(Icons.qr_code_scanner, color: Colors.white),
-            onPressed: onQrTap,
-          ),
-        ],
-      ),
-    );
-  }
-
-}
-
-/// 2. QRScannerSheet widget
-class QRScannerSheet extends StatefulWidget {
-  final Function(String) onScanned;
-  const QRScannerSheet({super.key, required this.onScanned});
-
-  @override
-  State<QRScannerSheet> createState() => _QRScannerSheetState();
-}
-
-class _QRScannerSheetState extends State<QRScannerSheet> {
-  final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
-  QRViewController? controller;
-  bool scanned = false;
-
-  @override
-  void dispose() {
-    controller?.dispose();
-    super.dispose();
-  }
-
-  void _onQRViewCreated(QRViewController controller) {
-    this.controller = controller;
-    controller.scannedDataStream.listen((scanData) {
-      if (!scanned) {
-        scanned = true;
-        widget.onScanned(scanData.code ?? '');
-        Navigator.of(context).maybePop();
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 350,
-      padding: EdgeInsets.all(16),
-      child: Column(
-        children: [
-          Text("Quét mã QR", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
+          const SizedBox(width: 16),
+          // Thay phần text thông tin thành slogan hoặc thông điệp
           Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: QRView(
-                key: qrKey,
-                onQRViewCreated: _onQRViewCreated,
-                overlay: QrScannerOverlayShape(
-                  borderColor: Colors.blue,
-                  borderRadius: 10,
-                  borderLength: 30,
-                  borderWidth: 10,
-                  cutOutSize: 200,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const [
+                Text(
+                  "Giáo Viên Mầm Non",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                 ),
-              ),
+
+              ],
             ),
           ),
-          const SizedBox(height: 12),
-          Text("Đưa mã QR vào khung để quét"),
         ],
       ),
     );
   }
 }
 
-/// 3. ProfileScreen hoàn chỉnh
+
+/// 2. ProfileScreen
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -151,26 +76,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
-  void _showQRScanner() async {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) {
-        return QRScannerSheet(
-          onScanned: (code) {
-            // Xử lý code QR tại đây, ví dụ: show snackbar
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('QR Đã quét: $code')),
-            );
-          },
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -180,16 +85,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              BannerSlider(onQrTap: _showQRScanner), // truyền callback ở đây
-              SizedBox(height: 20),
+              const BannerSlider(),
+              const SizedBox(height: 20),
               Padding(
-                padding: EdgeInsets.only(left: 18),
-                child: BulletinWidget(),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: const BulletinWidget(),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Padding(
-                padding: EdgeInsets.only(left: 18),
-                child: ScheduleWidget(),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: const ScheduleWidget(),
               ),
             ],
           ),
@@ -199,7 +104,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 }
 
-/// 4. BulletinWidget giữ nguyên
+/// 3. BulletinWidget
 class BulletinWidget extends StatefulWidget {
   const BulletinWidget({super.key});
 
@@ -240,108 +145,68 @@ class _BulletinWidgetState extends State<BulletinWidget> {
       color: Colors.grey[100],
       width: double.infinity,
       height: 450,
+      padding: const EdgeInsets.all(16),
       child: Column(
         children: [
+          // Chỉ giữ lại tiêu đề "Thực đơn ngày", xóa phần "Chi tiết"
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 16, top: 10),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 10,
-                      height: 10,
-                      decoration: const BoxDecoration(
-                        color: Colors.blue,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    const Text(
-                      "Thực đơn ngày",
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => MenuDetailScreen(menus: menus),
-                    ),
-                  );
-                },
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 16, top: 10),
-                  child: const Text(
-                    "Chi tiết",
-                    style: TextStyle(
-                      fontSize: 8,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blue,
-                    ),
-                  ),
-                ),
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: const [
+              Text(
+                "Thực đơn ngày",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
             ],
           ),
+          const SizedBox(height: 10),
           if (isLoading)
             const Center(child: CircularProgressIndicator())
           else if (menus.isNotEmpty)
             Expanded(
-              child: Row(
-                children: [
-                  Expanded(
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      itemCount: menus.length,
-                      itemBuilder: (context, index) {
-                        final menu = menus[index];
-                        return Container(
-                          width: 250,
-                          margin: const EdgeInsets.only(right: 16),
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 8,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "📅 ${DateFormat('yyyy-MM-dd').format(menu.date)}",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              Text("🍳 Bữa sáng: ${menu.breakfast ?? 'Không có'}"),
-                              const SizedBox(height: 8),
-                              Text("🍛 Bữa trưa: ${menu.lunch ?? 'Không có'}"),
-                              const SizedBox(height: 8),
-                              Text("🍲 Bữa tối: ${menu.dinner ?? 'Không có'}"),
-                            ],
-                          ),
-                        );
-                      },
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                itemCount: menus.length,
+                itemBuilder: (context, index) {
+                  final menu = menus[index];
+                  final String dayOfWeek = menu.dayOfWeek ?? 'Không rõ';
+
+                  return Container(
+                    width: 250,
+                    margin: const EdgeInsets.only(right: 16),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "$dayOfWeek",
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                        ),
+                        const SizedBox(height: 12),
+                        Text("🍳 Bữa Sáng: ${menu.breakfast ?? 'Không có'}"),
+                        const SizedBox(height: 8),
+                        Text("🍳 Bữa Sáng Phụ: ${menu.secondBreakfast ?? 'Không có'}"),
+                        const SizedBox(height: 8),
+                        Text("🍛 Bữa Trưa: ${menu.lunch ?? 'Không có'}"),
+                        const SizedBox(height: 8),
+                        Text("🍲 Bữa Chiều: ${menu.dinner ?? 'Không có'}"),
+                        const SizedBox(height: 8),
+                        Text("🍲 Bữa Chiều Phụ: ${menu.secondDinner ?? 'Không có'}"),
+                      ],
+                    ),
+                  );
+                },
               ),
             )
           else
@@ -352,170 +217,10 @@ class _BulletinWidgetState extends State<BulletinWidget> {
   }
 }
 
-/// 5. MenuDetailScreen giữ nguyên
-class MenuDetailScreen extends StatefulWidget {
-  final List<Menu> menus;
 
-  MenuDetailScreen({required this.menus});
 
-  @override
-  _MenuDetailScreenState createState() => _MenuDetailScreenState();
-}
 
-class _MenuDetailScreenState extends State<MenuDetailScreen> {
-  late List<Menu> menus;
-  late List<Menu> filteredMenus;
-  DateTime selectedDate = DateTime.now();
-
-  @override
-  void initState() {
-    super.initState();
-    menus = widget.menus;
-    filteredMenus = menus.where((menu) {
-      return DateFormat('yyyy-MM-dd').format(menu.date) == DateFormat('yyyy-MM-dd').format(selectedDate);
-    }).toList();
-  }
-
-  void selectDay(DateTime day) {
-    setState(() {
-      selectedDate = day;
-      filteredMenus = menus.where((menu) {
-        return DateFormat('yyyy-MM-dd').format(menu.date) == DateFormat('yyyy-MM-dd').format(selectedDate);
-      }).toList();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    List<String> daysOfWeek = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
-    List<DateTime> weekDates = List.generate(7, (index) {
-      return selectedDate.subtract(Duration(days: selectedDate.weekday - 1)).add(Duration(days: index));
-    });
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Thực đơn"),
-      ),
-      body: Column(
-        children: [
-          Container(
-            height: 50,
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: 7,
-              itemBuilder: (context, index) {
-                final day = weekDates[index];
-                return GestureDetector(
-                  onTap: () => selectDay(day),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Column(
-                      children: [
-                        Text(
-                          daysOfWeek[index],
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: DateFormat('yyyy-MM-dd').format(day) == DateFormat('yyyy-MM-dd').format(selectedDate)
-                                ? Colors.blue
-                                : Colors.black,
-                          ),
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          DateFormat('dd/MM').format(day),
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: DateFormat('yyyy-MM-dd').format(day) == DateFormat('yyyy-MM-dd').format(selectedDate)
-                                ? Colors.blue
-                                : Colors.black,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: filteredMenus.length,
-              itemBuilder: (context, index) {
-                final menu = filteredMenus[index];
-                return Container(
-                  padding: const EdgeInsets.all(16),
-                  margin: const EdgeInsets.only(bottom: 16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "📅 ${DateFormat('yyyy-MM-dd').format(menu.date)}",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
-                      ),
-                      SizedBox(height: 12),
-                      Text("🍳 Bữa sáng: ${menu.breakfast ?? 'Không có'}"),
-                      SizedBox(height: 8),
-                      Text("🍛 Bữa trưa: ${menu.lunch ?? 'Không có'}"),
-                      SizedBox(height: 8),
-                      Text("🍲 Bữa tối: ${menu.dinner ?? 'Không có'}"),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// 6. WeekScheduleWidget giữ nguyên
-class WeekScheduleWidget extends StatelessWidget {
-  final Function(DateTime) onDateSelected;
-
-  WeekScheduleWidget({required this.onDateSelected});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        ListView.builder(
-          shrinkWrap: true,
-          itemCount: 7,
-          itemBuilder: (context, index) {
-            DateTime day = DateTime.now().add(Duration(days: index));
-            return ListTile(
-              title: Text(DateFormat('EEEE, yyyy-MM-dd').format(day)),
-              onTap: () {
-                onDateSelected(day);
-              },
-            );
-          },
-        ),
-      ],
-    );
-  }
-}
-
-/// 7. ScheduleWidget giữ nguyên
+/// 5. ScheduleWidget
 class ScheduleWidget extends StatefulWidget {
   const ScheduleWidget({super.key});
 
@@ -525,7 +230,7 @@ class ScheduleWidget extends StatefulWidget {
 
 class _ScheduleWidgetState extends State<ScheduleWidget> {
   late ApiService apiService;
-  List<Schedule> schedulesToday = [];
+  List<Schedule> schedules = [];
   bool isLoading = true;
 
   @override
@@ -538,18 +243,12 @@ class _ScheduleWidgetState extends State<ScheduleWidget> {
   void fetchSchedules() async {
     try {
       List<Schedule> allSchedules = await apiService.getSchedules();
-      DateTime today = DateTime.now();
-      List<Schedule> todaySchedules = allSchedules.where((schedule) {
-        return schedule.startTime.year == today.year &&
-            schedule.startTime.month == today.month &&
-            schedule.startTime.day == today.day;
-      }).toList();
-
       setState(() {
-        schedulesToday = todaySchedules;
+        schedules = allSchedules;
         isLoading = false;
       });
     } catch (e) {
+      print('Lỗi khi lấy lịch học: $e');
       setState(() {
         isLoading = false;
       });
@@ -559,80 +258,110 @@ class _ScheduleWidgetState extends State<ScheduleWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.grey[100],
+      color: Colors.grey[50],
       width: double.infinity,
-      height: 400,
+      padding: const EdgeInsets.symmetric(vertical: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: EdgeInsets.fromLTRB(16, 10, 16, 0),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(
               children: [
-                CircleAvatar(
-                  radius: 5,
-                  backgroundColor: Colors.orange,
+                Container(
+                  width: 12,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    color: Colors.deepOrangeAccent,
+                    shape: BoxShape.circle,
+                  ),
                 ),
-                SizedBox(width: 8),
-                Text(
-                  "Hoạt động ngày",
+                const SizedBox(width: 10),
+                const Text(
+                  "Lịch học hôm nay",
                   style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.deepOrangeAccent,
                   ),
                 ),
               ],
             ),
           ),
-          SizedBox(height: 10),
-          Expanded(
-            child: isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : schedulesToday.isEmpty
-                ? const Center(child: Text("Không có hoạt động nào hôm nay"))
-                : ListView.separated(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: schedulesToday.length,
-              separatorBuilder: (context, index) => const SizedBox(height: 12),
+          const SizedBox(height: 16),
+          if (isLoading)
+            const Center(child: CircularProgressIndicator())
+          else if (schedules.isEmpty)
+            Center(
+              child: Text(
+                "Không có lịch học hôm nay",
+                style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+              ),
+            )
+          else
+            ListView.separated(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              itemCount: schedules.length,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              separatorBuilder: (context, index) => const SizedBox(height: 16),
               itemBuilder: (context, index) {
-                final schedule = schedulesToday[index];
-                return Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
+                final schedule = schedules[index];
+                return Material(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  elevation: 3,
+                  shadowColor: Colors.deepOrangeAccent.withOpacity(0.2),
+                  child: InkWell(
                     borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
+                    onTap: () {
+                      // Có thể xử lý sự kiện nhấn vào lịch học nếu muốn
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "📚 ${schedule.subjectId}",
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.deepOrangeAccent,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              const Icon(Icons.schedule, size: 18, color: Colors.grey),
+                              const SizedBox(width: 6),
+                              Text(
+                                "${schedule.startTime} - ${schedule.endTime}",
+                                style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                              ),
+                            ],
+                          ),
+                          if (schedule.teacherId != null)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.person, size: 18, color: Colors.grey),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    "Giáo viên ID: ${schedule.teacherId}",
+                                    style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
                       ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "📚 ${schedule.subjectId}",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        "🕐 ${DateFormat('HH:mm').format(schedule.startTime)} - ${DateFormat('HH:mm').format(schedule.endTime)}",
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 );
               },
             ),
-          ),
         ],
       ),
     );
