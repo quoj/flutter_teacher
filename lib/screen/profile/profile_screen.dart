@@ -259,7 +259,7 @@ class _BulletinWidgetState extends State<BulletinWidget> {
                     ),
                     const SizedBox(width: 8),
                     const Text(
-                      "Thực đơn ngày",
+                      "Thực đơn tuần",
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
